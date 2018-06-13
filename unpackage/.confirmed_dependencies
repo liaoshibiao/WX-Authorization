@@ -1,0 +1,13 @@
+{
+  "index.html": {
+    "resources": [
+      "fonts/mui.ttf",
+      "css/mui.min.css",
+      "js/mui.min.js",
+      "js/mui.zoom.js",
+      "js/mui.previewimage.js",
+      "js/mui.js",
+      "img/touxiang.jpg"
+    ]
+  }
+}

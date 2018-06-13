@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+	</head>
+	<style>
+	body{
+		background:#323232;
+	}
+		.count{
+			width:100%;height:300px;background: red;
+		}
+		.c-top{
+			width:100%;height:150px;background:green;
+		}
+		.c-top-l{
+			width: 40%;height: 150px;float: left;background:#00FFBA;
+		}
+		.c-top-r{
+			width: 60%;height:150px;float: left;
+		}
+		.c-top-r-t{
+			width: 100%;height:75px;background: deepskyblue;
+		}
+		.c-top-r-c{
+			width: 100%;height:75px;background:#7200FF;
+		}
+		.c-top-r-b{
+			width: 100%;height: 50px;background:blue;
+		}
+		.c-top-r label{
+			color: #FFFFFF;font-size:30px;line-height:75px;
+		}
+		.c-top-r span{
+			color:red;
+			font-size:30px;
+		}
+		.c-bot{
+			width:100%;height: 150px;background:orange;
+		}
+		.c-bot button{
+			width:100%;height:149px;background:#FF1200;color: #FFFFFF;font-size:80px;
+			float: left;
+		}
+		#OP{
+			width: 100%;height: 100px;background: yellowgreen;text-align: center;
+		}
+		#OP label{
+			color: #FFFFFF;font-size:30px;line-height:50px;
+		}
+		#OP span{ 
+			color: red;font-size: 20px ;line-height:30px;
+		}
+		
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">微信授权登录</h1>
+		    <span id="fenxiang" style="float: right;" class="mui-icon mui-icon-redo"></span>
+		</header>
+		<div class="mui-content">
+		    <div class="count">
+			<div class="c-top">
+				<div class="c-top-l">
+					<img src="" id="touxiang" style="width:100%;height: 150px;"/>
+				</div>
+				<div class="c-top-r">
+					<div class="c-top-r-t"><label>昵称：</label><span id="username"></span></div>
+					<div class="c-top-r-c"><label>性别：</label><span id="sex"></span></div>
+				</div>
+			</div>
+			<div class="c-bot">
+				<button id="Out" type="button">注销</button>
+			</div>
+		</div>
+		<div id="OP"><label>OpenId：</label><br/><span id="OpenId"></span></div>
+		</div>
+	</body>
+</html>
+<script src="js/mui.min.js"></script>
+<script type="text/javascript">
+		mui.init()
+
+		window.onload = function(){
+			document.addEventListener('plusready',function(){
+				plus.nativeUI.alert("请登录！", function(){
+					var s = auths[0];
+					if(!s.authResult) {
+						s.login(function(e) {
+							authUserInfo();
+							mui.toast("登录成功！");
+						}, function(e) {
+							mui.toast("登录失败！");
+						});
+						} else {
+							authUserInfo();
+							mui.toast("您已登录！");
+						}
+				});
+				
+				
+				//分享
+				plus.share.getServices( function(s){
+					shares = s;
+					console.log(JSON.stringify(s[0]))
+					for(var i in s){
+						
+						if('weixin'==s[i].id){
+							sharewx=s[i];
+						}
+						else if('qq'==s[2].id){
+							shareqq=s[2];
+						}
+						
+					}
+				}, function(e){
+					alert( "获取分享服务列表失败："+e.message );
+				} );
+				
+				
+			})
+		}
+		document.getElementById("Out").addEventListener('tap',function(){
+			authLogout();
+		})
+		var auths = null;
+		 document.addEventListener("plusready", function() {
+			plus.oauth.getServices(function(services) {
+				auths = services;
+			}, function(e) {
+				mui.toast("获取分享服务列表失败：" + e.message + " - " + e.code);
+				});
+			}, false);
+		function authLogout(){
+			for ( var i in auths ) {
+			var s = auths[i];
+			if ( s.authResult ) {
+				s.logout(function(e){
+					mui.toast( "注销成功！" );
+					
+					window.location.reload()
+					return false;					
+				}, function(e){
+					mui.toast( "注销失败！" );
+				});
+				}
+			}
+			
+		}
+		function authUserInfo() {
+			var touxiangimg =document.getElementById("touxiang")
+			var username = document.getElementById("username")
+			var sex = document.getElementById("sex")
+			var openid =document.getElementById("OpenId")
+			var s = auths[0];
+			if(!s.authResult) {
+				mui.toast("未登录授权！");
+			} else {
+				s.getUserInfo(function(e) {
+				var Ms = s.userInfo;
+				touxiangimg.src = Ms.headimgurl;
+				username.innerHTML = Ms.nickname;
+				if(Ms.sex==1){
+					sex.innerHTML="男"
+				}
+				else{
+					sex.innerHTML="女"
+				}
+				openid.innerHTML=Ms.openid;
+				}, function(e) {
+					mui.toast("获取用户信息失败：" + e.message + " - " + e.code);
+				});
+				}
+			}
+	
+		    function shareWeixinMessage(){
+				sharewx.send( {content:"分享给你的朋友吧！",extra:{scene:"WXSceneTimeline"}}, function(){
+					alert( "分享成功！" );
+				}, function(e){
+					alert( "分享失败："+e.message );
+				});
+			}
+		     function QQ(){
+				shareqq.send( {content:"分享给你的朋友吧！",title:"aa",href:"http://www.baidu.com",extra:{scene:"qq"}}, function(){
+					alert( "分享成功！" );
+				}, function(e){
+					alert( "分享失败："+e.message );
+				});
+			}
+		document.getElementById("fenxiang").addEventListener('tap',function(){
+			plus.nativeUI.actionSheet({title:"请选择",cancel:"取消",buttons:[{'title':'QQ'},{'title':'朋友圈'},{'title':'新浪微博'}]},
+				function(e){
+					if(e.index==1){
+						QQ()
+					}else if(e.index==2){
+						shareWeixinMessage();
+					}else if(e.index==3){
+						alert("暂不支持此平台")
+					}
+				})
+		})
+		
+		
+		
+		
+		
+</script>
